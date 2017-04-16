@@ -3,6 +3,7 @@ package com.myhexaville.login;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
 
         binding.login.setRotation(-90);
+
     }
 
     @Override

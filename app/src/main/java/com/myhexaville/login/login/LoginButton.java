@@ -10,6 +10,7 @@ import android.graphics.Path;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
@@ -124,6 +125,9 @@ public class LoginButton extends View {
         paint2.setStyle(FILL);
         path = new Path();
 
+        Log.d(LOG_TAG, "onCreate: "+ getResources().getDisplayMetrics().density);
+
+
     }
 
     private int getButtonHeight() {
@@ -146,8 +150,8 @@ public class LoginButton extends View {
             float gone = (width - start) * fraction;
             currentRight = start + gone;
 
-            currentArcY = (int) (fraction * 100);
-            currentArcX = (int) (fraction * 130);
+            currentArcY = (int) (fraction * dpToPixels(28)); // just hardcoded value
+            currentArcX = (int) (fraction * dpToPixels(37)); // just hardcoded value
 
             double y = tan(currentAngle) * currentRight; // goes from ~ 0 to 4451
             float realY = (float) (buttonTop - y); // goes ~ from 1234 to -1243
@@ -199,6 +203,10 @@ public class LoginButton extends View {
 
     private float getStartButtonRight() {
         return getResources().getDimensionPixelOffset(R.dimen.bottom_width);
+    }
+
+    private float dpToPixels(int dp) {
+        return getResources().getDisplayMetrics().density * dp;
     }
 
 }
