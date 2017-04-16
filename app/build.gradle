@@ -24,7 +24,7 @@ android {
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
         applicationId "com.myhexaville.login"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -36,14 +36,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    productFlavors {
-        modern {
-            minSdkVersion 21
-        }
-        legacy {
-            minSdkVersion 16
-        }
-    }
+
 }
 
 kapt {
