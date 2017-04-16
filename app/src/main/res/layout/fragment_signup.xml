@@ -1,0 +1,40 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.myhexaville.login.login.SignUpFragment">
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="92dp"
+        android:textColor="#ffffff"
+        android:background="@drawable/bubble"
+        android:gravity="center_vertical"
+        android:paddingStart="32dp"
+        android:text="Email" />
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/bubble"
+        android:gravity="center_vertical"
+        android:textColor="#ffffff"
+        android:paddingStart="32dp"
+        android:text="Password" />
+
+    <TextView
+        android:layout_width="200dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/bubble"
+        android:gravity="center_vertical"
+        android:textColor="#ffffff"
+        android:paddingStart="32dp"
+        android:text="Confirm Password" />
+</LinearLayout>
