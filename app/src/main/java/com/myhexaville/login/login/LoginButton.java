@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
@@ -21,6 +22,7 @@ import static java.lang.Math.PI;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.tan;
+import static java.lang.String.format;
 
 public class LoginButton extends View {
     public static final String LOG_TAG = "LoginButton";
@@ -28,8 +30,13 @@ public class LoginButton extends View {
 
     private int buttonTop, buttonBottom;
 
-    private Paint paint;
-    private Path path;
+    private Paint loginButtonPaint;
+    private Paint signUpButtonPaint;
+
+    private Path loginButtonPath = new Path();
+    private Path signUpButtonPath = new Path();
+
+    private Rect r = new Rect();
 
     private int currentRectangleRight;
     private float currentY;
@@ -39,17 +46,23 @@ public class LoginButton extends View {
     private float currentBottomX;
     private int currentArcY;
     private float currentArcX;
+
     private Paint paint2;
-    private Rect r = new Rect();
     private Paint loginPaint;
     private Paint orPaint;
     private Paint signUpPaint;
+
     private float currentLoginX;
+    private float currentSignUpX;
     private float startLoginX;
     private float largeTextSize;
     private float smallTextSize;
     private float currentLoginY;
     private float startLoginY;
+    private int currentLeft;
+    private float signUpOrX;
+    private float margin;
+
 
     public LoginButton(Context context) {
         super(context);
@@ -71,69 +84,18 @@ public class LoginButton extends View {
         init();
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        width = w;
-        height = h;
-        buttonTop = height - getBottomMargin() - getButtonHeight();
-        buttonBottom = height - getBottomMargin();
-        currentRectangleRight = (int) getStartButtonRight();
-
-        buttonCenter = (buttonBottom - buttonTop) / 2 + buttonTop;
-
-        currentY = buttonCenter;
-        currentBottomY = buttonBottom;
-        currentRight = currentRectangleRight;
-
-        currentLoginX = dpToPixels(92);
-        currentLoginY = buttonCenter + dpToPixels(8);
-        largeTextSize = dpToPixels(64);
-        smallTextSize = dpToPixels(16);
-
-        startLoginX = currentLoginX;
-        startLoginY = currentLoginY;
-
-        path.moveTo(0, buttonBottom);
-        path.lineTo(currentRight, buttonBottom);
-        path.lineTo(currentRight, buttonTop);
-        path.lineTo(0, buttonTop);
-        path.close();
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        canvas.drawText("SIGN UP", width / 2, 1600, signUpPaint);
-
-        canvas.drawPath(path, paint);
-
-        canvas.drawArc(
-                currentRight - getButtonHeight() / 2 + currentArcX,
-                buttonTop,
-                currentRight + getButtonHeight() / 2 - currentArcX,
-                buttonBottom,
-                0,
-                360,
-                false,
-                paint);
-
-
-        canvas.drawText("OR", dpToPixels(32), buttonCenter + dpToPixels(8), orPaint);
-
-        canvas.drawText("LOGIN", currentLoginX, currentLoginY, loginPaint);
-    }
-
     private void init() {
-        paint = new Paint();
-        paint.setColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
-        paint.setStyle(FILL);
+        loginButtonPaint = new Paint();
+        loginButtonPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+        loginButtonPaint.setStyle(FILL);
+
+        signUpButtonPaint = new Paint();
+        signUpButtonPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        signUpButtonPaint.setStyle(FILL);
 
         paint2 = new Paint();
         paint2.setColor(Color.parseColor("#ffffff"));
         paint2.setStyle(FILL);
-        path = new Path();
 
         loginPaint = new Paint();
         loginPaint.setColor(ContextCompat.getColor(getContext(), R.color.text));
@@ -150,6 +112,93 @@ public class LoginButton extends View {
 //        signUpPaint.setTypeface(Typeface.create(DEFAULT, BOLD));
         signUpPaint.setTextAlign(Paint.Align.CENTER);
         signUpPaint.setAlpha(125);
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        width = w;
+        height = h;
+        buttonTop = height - getBottomMargin() - getButtonHeight();
+        buttonBottom = height - getBottomMargin();
+        currentRectangleRight = (int) getStartButtonRight();
+
+        buttonCenter = (buttonBottom - buttonTop) / 2 + buttonTop;
+
+        currentY = buttonCenter;
+        currentBottomY = buttonBottom;
+        currentRight = currentRectangleRight;
+        currentLeft = width - currentRectangleRight;
+
+        loginPaint.getTextBounds("SIGN UP", 0, 7, r);
+
+        currentLoginX = dpToPixels(92);
+        int signUpWidth = r.right;
+        currentSignUpX = width - signUpWidth / 2 - dpToPixels(32);
+
+        loginPaint.getTextBounds("LOGIN", 0, 5, r);
+        int loginWidth = r.right;
+        orPaint.getTextBounds("OR", 0, 2, r);
+        margin = (currentLoginX - loginWidth / 2) - dpToPixels(32) - r.right;
+        signUpOrX = width - signUpWidth - dpToPixels(32) - r.right - margin;
+
+        currentLoginY = buttonCenter + dpToPixels(8);
+        largeTextSize = dpToPixels(64);
+        smallTextSize = dpToPixels(16);
+
+        startLoginX = currentLoginX;
+        startLoginY = currentLoginY;
+
+        loginButtonPath.moveTo(0, buttonBottom);
+        loginButtonPath.lineTo(currentRight, buttonBottom);
+        loginButtonPath.lineTo(currentRight, buttonTop);
+        loginButtonPath.lineTo(0, buttonTop);
+        loginButtonPath.close();
+
+        signUpButtonPath.moveTo(width, buttonBottom);
+        signUpButtonPath.lineTo(currentLeft, buttonBottom);
+        signUpButtonPath.lineTo(currentLeft, buttonTop);
+        signUpButtonPath.lineTo(width, buttonTop);
+        signUpButtonPath.close();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        canvas.drawText("SIGN UP", width / 2, 1600, signUpPaint);
+
+        canvas.drawPath(loginButtonPath, loginButtonPaint);
+        canvas.drawArc(
+                currentRight - getButtonHeight() / 2 + currentArcX,
+                buttonTop,
+                currentRight + getButtonHeight() / 2 - currentArcX,
+                buttonBottom,
+                0,
+                360,
+                false,
+                loginButtonPaint);
+
+        canvas.drawPath(signUpButtonPath, signUpButtonPaint);
+        canvas.drawArc(
+                currentLeft - getButtonHeight() / 2 + currentArcX,
+                buttonTop,
+                currentLeft + getButtonHeight() / 2 - currentArcX,
+                buttonBottom,
+                0,
+                360,
+                false,
+                signUpButtonPaint);
+
+
+        canvas.drawText("OR", dpToPixels(32), buttonCenter + dpToPixels(8), orPaint);
+
+        canvas.drawText("LOGIN", currentLoginX, currentLoginY, loginPaint);
+
+
+        canvas.drawText("OR", signUpOrX, buttonCenter + dpToPixels(8), orPaint);
+
+        canvas.drawText("SIGN UP", currentSignUpX, currentLoginY, loginPaint);
     }
 
     private int getButtonHeight() {
@@ -213,18 +262,18 @@ public class LoginButton extends View {
                 currentBottomY = height;
             }
 
-            path.reset();
-            path.moveTo(0, buttonBottom);
-            path.lineTo(currentRight, buttonBottom);
-            path.lineTo(currentRight, buttonTop);
+            loginButtonPath.reset();
+            loginButtonPath.moveTo(0, buttonBottom);
+            loginButtonPath.lineTo(currentRight, buttonBottom);
+            loginButtonPath.lineTo(currentRight, buttonTop);
 
-            path.lineTo(currentX, currentY);
-            path.lineTo(0, currentY);
+            loginButtonPath.lineTo(currentX, currentY);
+            loginButtonPath.lineTo(0, currentY);
 
             // bottom reveal
-            path.lineTo(0, currentBottomY);
-            path.lineTo(currentBottomX, currentBottomY);
-            path.lineTo(currentRight, buttonBottom);
+            loginButtonPath.lineTo(0, currentBottomY);
+            loginButtonPath.lineTo(currentBottomX, currentBottomY);
+            loginButtonPath.lineTo(currentRight, buttonBottom);
 
 
             currentX = 0;
