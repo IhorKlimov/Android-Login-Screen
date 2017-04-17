@@ -7,10 +7,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
@@ -40,6 +40,16 @@ public class LoginButton extends View {
     private int currentArcY;
     private float currentArcX;
     private Paint paint2;
+    private Rect r = new Rect();
+    private Paint loginPaint;
+    private Paint orPaint;
+    private Paint signUpPaint;
+    private float currentLoginX;
+    private float startLoginX;
+    private float largeTextSize;
+    private float smallTextSize;
+    private float currentLoginY;
+    private float startLoginY;
 
     public LoginButton(Context context) {
         super(context);
@@ -76,6 +86,14 @@ public class LoginButton extends View {
         currentBottomY = buttonBottom;
         currentRight = currentRectangleRight;
 
+        currentLoginX = dpToPixels(92);
+        currentLoginY = buttonCenter + dpToPixels(8);
+        largeTextSize = dpToPixels(64);
+        smallTextSize = dpToPixels(16);
+
+        startLoginX = currentLoginX;
+        startLoginY = currentLoginY;
+
         path.moveTo(0, buttonBottom);
         path.lineTo(currentRight, buttonBottom);
         path.lineTo(currentRight, buttonTop);
@@ -86,6 +104,8 @@ public class LoginButton extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        canvas.drawText("SIGN UP", width / 2, 1600, signUpPaint);
 
         canvas.drawPath(path, paint);
 
@@ -100,19 +120,9 @@ public class LoginButton extends View {
                 paint);
 
 
-//        Paint p = new Paint();
-//        p.setColor(ContextCompat.getColor(getContext(), R.color.text));
-//        p.setTextSize(getResources().getDisplayMetrics().density * 16);
-//
-//        Paint p2 = new Paint();
-//        p2.setColor(ContextCompat.getColor(getContext(), R.color.text_two));
-//        p2.setTextSize(getResources().getDisplayMetrics().density * 16);
-//
-//        canvas.drawText("OR", getResources().getDisplayMetrics().density * 32,
-//                buttonCenter + getResources().getDisplayMetrics().density * 8, p2);
-//
-//        canvas.drawText("LOGIN", getResources().getDisplayMetrics().density * 72,
-//                buttonCenter + getResources().getDisplayMetrics().density * 8, p);
+        canvas.drawText("OR", dpToPixels(32), buttonCenter + dpToPixels(8), orPaint);
+
+        canvas.drawText("LOGIN", currentLoginX, currentLoginY, loginPaint);
     }
 
     private void init() {
@@ -125,9 +135,21 @@ public class LoginButton extends View {
         paint2.setStyle(FILL);
         path = new Path();
 
-        Log.d(LOG_TAG, "onCreate: "+ getResources().getDisplayMetrics().density);
+        loginPaint = new Paint();
+        loginPaint.setColor(ContextCompat.getColor(getContext(), R.color.text));
+        loginPaint.setTextAlign(Paint.Align.CENTER);
+        loginPaint.setTextSize(dpToPixels(16));
 
+        orPaint = new Paint();
+        orPaint.setColor(ContextCompat.getColor(getContext(), R.color.text_two));
+        orPaint.setTextSize(dpToPixels(16));
 
+        signUpPaint = new Paint();
+        signUpPaint.setColor(ContextCompat.getColor(getContext(), R.color.text));
+        signUpPaint.setTextSize(dpToPixels(64));
+//        signUpPaint.setTypeface(Typeface.create(DEFAULT, BOLD));
+        signUpPaint.setTextAlign(Paint.Align.CENTER);
+        signUpPaint.setAlpha(125);
     }
 
     private int getButtonHeight() {
@@ -141,7 +163,6 @@ public class LoginButton extends View {
     public void startAnimation() {
         float start = getStartButtonRight();
         ValueAnimator animator = ObjectAnimator.ofFloat(0f, 1f);
-//        animator.setInterpolator(new LinearInterpolator());
         animator.setInterpolator(new AccelerateInterpolator());
         animator.addUpdateListener(animation -> {
             float fraction = (float) animation.getAnimatedValue();
@@ -149,6 +170,19 @@ public class LoginButton extends View {
 
             float gone = (width - start) * fraction;
             currentRight = start + gone;
+
+
+            // fade out sign up text to 0
+            signUpPaint.setAlpha((int) (125 - 125 * fraction));
+
+            if (orPaint.getAlpha() != 0) {
+                orPaint.setAlpha(0);
+            }
+
+            // move login text to center and scale
+            currentLoginX = startLoginX + ((width / 2 - startLoginX) * fraction);
+            currentLoginY = startLoginY - ((startLoginY - 1600) * fraction);
+            loginPaint.setTextSize(smallTextSize + ((largeTextSize - smallTextSize) * (fraction)));
 
             currentArcY = (int) (fraction * dpToPixels(28)); // just hardcoded value
             currentArcX = (int) (fraction * dpToPixels(37)); // just hardcoded value
@@ -190,7 +224,7 @@ public class LoginButton extends View {
             // bottom reveal
             path.lineTo(0, currentBottomY);
             path.lineTo(currentBottomX, currentBottomY);
-            path.lineTo(currentRight, buttonBottom); // constant
+            path.lineTo(currentRight, buttonBottom);
 
 
             currentX = 0;

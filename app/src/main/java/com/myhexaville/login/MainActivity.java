@@ -46,4 +46,5 @@ public class MainActivity extends AppCompatActivity {
     private int getBottomMargin() {
         return getResources().getDimensionPixelOffset(R.dimen.bottom_margin);
     }
+
 }
