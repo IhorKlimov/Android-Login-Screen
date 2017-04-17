@@ -5,11 +5,12 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#131A56"
         android:fitsSystemWindows="true"
         tools:context="com.myhexaville.login.MainActivity">
 
         <FrameLayout
-            android:id="@+id/sign_up"
+            android:id="@+id/bottom"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
@@ -22,7 +23,7 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <FrameLayout
-            android:id="@+id/login"
+            android:id="@+id/top"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />

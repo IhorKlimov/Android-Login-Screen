@@ -1,9 +1,11 @@
 package com.myhexaville.login;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
@@ -15,6 +17,7 @@ import com.myhexaville.login.login.SignUpFragment;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+    private boolean isLogin = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,24 +25,58 @@ public class MainActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.sign_up, new SignUpFragment())
-                .replace(R.id.login, new LoginFragment())
+                .replace(R.id.bottom, new SignUpFragment())
+                .replace(R.id.top, new LoginFragment())
                 .commit();
 
-        binding.login.setRotation(-90);
+        binding.top.setRotation(-90);
+
+        binding.button.setOnButtonSwitched(isLogin ->
+                binding.getRoot()
+                        .setBackgroundColor(ContextCompat.getColor(
+                                this,
+                                isLogin ? R.color.colorPrimary : R.color.colorAccent)));
 
     }
 
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        binding.login.setPivotX(binding.login.getWidth() / 2);
-        binding.login.setPivotY(binding.login.getHeight());
+        binding.top.setPivotX(binding.top.getWidth() / 2);
+        binding.top.setPivotY(binding.top.getHeight());
     }
 
+    // todo fix ugly replacement
     public void rotate(View view) {
-        binding.login.animate().rotation(0).setInterpolator(new AccelerateInterpolator());
-        binding.signUp.animate().alpha(0f).setInterpolator(new AccelerateInterpolator());
+        binding.top.animate().rotation(0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (isLogin) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.bottom, new LoginFragment())
+                            .replace(R.id.top, new SignUpFragment())
+                            .commit();
+                    binding.top.setRotation(90);
+                } else {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.bottom, new SignUpFragment())
+                            .replace(R.id.top, new LoginFragment())
+                            .commit();
+                    binding.top.setRotation(-90);
+                }
+
+                isLogin = !isLogin;
+            }
+        });
+
+        binding.bottom.animate().alpha(0f).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                binding.bottom.setAlpha(1f);
+            }
+        });
         binding.button.startAnimation();
     }
 

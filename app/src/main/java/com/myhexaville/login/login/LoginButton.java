@@ -1,5 +1,6 @@
 package com.myhexaville.login.login;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 
+import com.myhexaville.login.OnButtonSwitchedListener;
 import com.myhexaville.login.R;
 
 import static android.graphics.Paint.Style.FILL;
@@ -22,7 +24,6 @@ import static java.lang.Math.PI;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.tan;
-import static java.lang.String.format;
 
 public class LoginButton extends View {
     public static final String LOG_TAG = "LoginButton";
@@ -53,15 +54,24 @@ public class LoginButton extends View {
     private Paint signUpPaint;
 
     private float currentLoginX;
-    private float currentSignUpX;
-    private float startLoginX;
+    private float currentSignUpTextX;
     private float largeTextSize;
     private float smallTextSize;
     private float currentLoginY;
-    private float startLoginY;
-    private int currentLeft;
+    private float currentLeft;
     private float signUpOrX;
-    private float margin;
+    private boolean isLogin = true;
+    private float currentSignUpTextY;
+    private float currentSignUpX;
+    private float currentBottomSignUpX;
+    private int startLeft;
+
+    private OnButtonSwitchedListener callback;
+
+    private float startSignUpTextX;
+    private float startSignUpTextY;
+    private float startLoginX;
+    private float startLoginY;
 
 
     public LoginButton(Context context) {
@@ -125,29 +135,39 @@ public class LoginButton extends View {
 
         buttonCenter = (buttonBottom - buttonTop) / 2 + buttonTop;
 
+        currentSignUpX = width;
+        Log.d(LOG_TAG, "onSizeChanged: " + currentSignUpX);
+        currentBottomSignUpX = width;
+
         currentY = buttonCenter;
         currentBottomY = buttonBottom;
         currentRight = currentRectangleRight;
         currentLeft = width - currentRectangleRight;
+        startLeft = width - currentRectangleRight;
 
         loginPaint.getTextBounds("SIGN UP", 0, 7, r);
 
         currentLoginX = dpToPixels(92);
         int signUpWidth = r.right;
-        currentSignUpX = width - signUpWidth / 2 - dpToPixels(32);
+        currentSignUpTextX = width - signUpWidth / 2 - dpToPixels(32);
+
 
         loginPaint.getTextBounds("LOGIN", 0, 5, r);
         int loginWidth = r.right;
         orPaint.getTextBounds("OR", 0, 2, r);
-        margin = (currentLoginX - loginWidth / 2) - dpToPixels(32) - r.right;
+        float margin = (currentLoginX - loginWidth / 2) - dpToPixels(32) - r.right;
         signUpOrX = width - signUpWidth - dpToPixels(32) - r.right - margin;
 
         currentLoginY = buttonCenter + dpToPixels(8);
+        currentSignUpTextY = buttonCenter + dpToPixels(8);
         largeTextSize = dpToPixels(64);
         smallTextSize = dpToPixels(16);
 
         startLoginX = currentLoginX;
         startLoginY = currentLoginY;
+        startSignUpTextX = currentSignUpTextX;
+        startSignUpTextY = currentSignUpTextY;
+
 
         loginButtonPath.moveTo(0, buttonBottom);
         loginButtonPath.lineTo(currentRight, buttonBottom);
@@ -166,39 +186,48 @@ public class LoginButton extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        canvas.drawText("SIGN UP", width / 2, 1600, signUpPaint);
+        if (isLogin) {
+            canvas.drawText("SIGN UP", width / 2, 1600, signUpPaint);
+        } else {
+            canvas.drawText("LOGIN", width / 2, 1600, loginPaint);
+        }
 
-        canvas.drawPath(loginButtonPath, loginButtonPaint);
-        canvas.drawArc(
-                currentRight - getButtonHeight() / 2 + currentArcX,
-                buttonTop,
-                currentRight + getButtonHeight() / 2 - currentArcX,
-                buttonBottom,
-                0,
-                360,
-                false,
-                loginButtonPaint);
+        if (isLogin) {
+//            canvas.drawRect(0, 0, width, height, signUpButtonPaint);
+            canvas.drawPath(loginButtonPath, loginButtonPaint);
+            canvas.drawArc(
+                    currentRight - getButtonHeight() / 2 + currentArcX,
+                    buttonTop,
+                    currentRight + getButtonHeight() / 2 - currentArcX,
+                    buttonBottom,
+                    0,
+                    360,
+                    false,
+                    loginButtonPaint);
+        }
 
-        canvas.drawPath(signUpButtonPath, signUpButtonPaint);
-        canvas.drawArc(
-                currentLeft - getButtonHeight() / 2 + currentArcX,
-                buttonTop,
-                currentLeft + getButtonHeight() / 2 - currentArcX,
-                buttonBottom,
-                0,
-                360,
-                false,
-                signUpButtonPaint);
-
-
-        canvas.drawText("OR", dpToPixels(32), buttonCenter + dpToPixels(8), orPaint);
-
+        if (isLogin) {
+            canvas.drawText("OR", dpToPixels(32), buttonCenter + dpToPixels(8), orPaint);
+        }
         canvas.drawText("LOGIN", currentLoginX, currentLoginY, loginPaint);
 
+        if (!isLogin) {
+//            canvas.drawRect(0, 0, width, height, loginButtonPaint);
+            canvas.drawPath(signUpButtonPath, signUpButtonPaint);
+            canvas.drawArc(
+                    currentLeft - getButtonHeight() / 2 + currentArcX,
+                    buttonTop,
+                    currentLeft + getButtonHeight() / 2 - currentArcX,
+                    buttonBottom,
+                    0,
+                    360,
+                    false,
+                    signUpButtonPaint);
 
-        canvas.drawText("OR", signUpOrX, buttonCenter + dpToPixels(8), orPaint);
+            canvas.drawText("OR", signUpOrX, buttonCenter + dpToPixels(8), orPaint);
 
-        canvas.drawText("SIGN UP", currentSignUpX, currentLoginY, loginPaint);
+            canvas.drawText("SIGN UP", currentSignUpTextX, currentSignUpTextY, signUpPaint);
+        }
     }
 
     private int getButtonHeight() {
@@ -212,26 +241,37 @@ public class LoginButton extends View {
     public void startAnimation() {
         float start = getStartButtonRight();
         ValueAnimator animator = ObjectAnimator.ofFloat(0f, 1f);
-        animator.setInterpolator(new AccelerateInterpolator());
+//        animator.setInterpolator(new AccelerateInterpolator());
         animator.addUpdateListener(animation -> {
             float fraction = (float) animation.getAnimatedValue();
             float currentAngle = fraction * ((float) PI / 2); // in radians
 
             float gone = (width - start) * fraction;
             currentRight = start + gone;
-
+            currentLeft = startLeft - gone;
 
             // fade out sign up text to 0
-            signUpPaint.setAlpha((int) (125 - 125 * fraction));
+            if (isLogin) {
+                signUpPaint.setAlpha((int) (125 - 125 * fraction));
+            } else {
+                loginPaint.setAlpha((int) (255 - 255 * fraction));
+                signUpPaint.setAlpha((int) (255 - 130 * fraction));
+            }
 
             if (orPaint.getAlpha() != 0) {
                 orPaint.setAlpha(0);
             }
 
             // move login text to center and scale
-            currentLoginX = startLoginX + ((width / 2 - startLoginX) * fraction);
-            currentLoginY = startLoginY - ((startLoginY - 1600) * fraction);
-            loginPaint.setTextSize(smallTextSize + ((largeTextSize - smallTextSize) * (fraction)));
+            if (isLogin) {
+                currentLoginX = startLoginX + ((width / 2 - startLoginX) * fraction);
+                currentLoginY = startLoginY - ((startLoginY - 1600) * fraction);
+                loginPaint.setTextSize(smallTextSize + ((largeTextSize - smallTextSize) * (fraction)));
+            } else {
+                currentSignUpTextX = startSignUpTextX - ((startSignUpTextX - width / 2) * fraction);
+                currentSignUpTextY = startSignUpTextY - ((startSignUpTextY - 1600) * fraction);
+                signUpPaint.setTextSize(smallTextSize + ((largeTextSize - smallTextSize) * (fraction)));
+            }
 
             currentArcY = (int) (fraction * dpToPixels(28)); // just hardcoded value
             currentArcX = (int) (fraction * dpToPixels(37)); // just hardcoded value
@@ -248,11 +288,13 @@ public class LoginButton extends View {
             if (currentY == 0) { // if reached top, start moving to the right
                 double cot = 1.0f / tan(currentAngle);
                 currentX = (float) ((y - buttonTop) * cot);
+                currentSignUpX = width - currentX;
             }
 
             if (currentBottomY == height) {
                 double cot = 1.0f / tan(currentAngle);
                 currentBottomX = (float) ((y - getBottomMargin()) * cot);
+                currentBottomSignUpX = width - currentBottomX;
             }
 
             if (currentAngle == (float) PI / 2) {
@@ -262,23 +304,103 @@ public class LoginButton extends View {
                 currentBottomY = height;
             }
 
-            loginButtonPath.reset();
-            loginButtonPath.moveTo(0, buttonBottom);
-            loginButtonPath.lineTo(currentRight, buttonBottom);
-            loginButtonPath.lineTo(currentRight, buttonTop);
+            if (isLogin) {
+                loginButtonPath.reset();
+                loginButtonPath.moveTo(0, buttonBottom);
+                loginButtonPath.lineTo(currentRight, buttonBottom);
+                loginButtonPath.lineTo(currentRight, buttonTop);
 
-            loginButtonPath.lineTo(currentX, currentY);
-            loginButtonPath.lineTo(0, currentY);
+                loginButtonPath.lineTo(currentX, currentY);
+                loginButtonPath.lineTo(0, currentY);
 
-            // bottom reveal
-            loginButtonPath.lineTo(0, currentBottomY);
-            loginButtonPath.lineTo(currentBottomX, currentBottomY);
-            loginButtonPath.lineTo(currentRight, buttonBottom);
+                // bottom reveal
+                loginButtonPath.lineTo(0, currentBottomY);
+                loginButtonPath.lineTo(currentBottomX, currentBottomY);
+                loginButtonPath.lineTo(currentRight, buttonBottom);
+            } else {
+                signUpButtonPath.reset();
+                signUpButtonPath.moveTo(width, buttonBottom);
+                signUpButtonPath.lineTo(currentLeft, buttonBottom);
+                signUpButtonPath.lineTo(currentLeft, buttonTop);
+
+                signUpButtonPath.lineTo(currentSignUpX, currentY);
+                signUpButtonPath.lineTo(width, currentY);
+
+                // bopttom reveal
+                signUpButtonPath.lineTo(width, currentBottomY);
+                signUpButtonPath.lineTo(currentBottomSignUpX, currentBottomY);
+                signUpButtonPath.lineTo(currentLeft, buttonBottom);
+
+                Log.d(LOG_TAG, "startAnimation: " + currentSignUpX);
+            }
 
 
             currentX = 0;
+            currentSignUpX = width;
             currentBottomX = 0;
+            currentBottomSignUpX = width;
             invalidate();
+        });
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                Log.d(LOG_TAG, "onAnimationEnd: ");
+                orPaint.setAlpha(125);
+                signUpPaint.setAlpha(255);
+                signUpPaint.setTextSize(dpToPixels(16));
+                currentArcX = 0;
+                currentArcY = 0;
+
+                currentRight = (int) getStartButtonRight();
+                currentLeft = width - (int) getStartButtonRight();
+
+                isLogin = !isLogin;
+
+                if (isLogin) {
+                    currentLoginX = startLoginX;
+                    currentLoginY = startLoginY;
+                    loginPaint.setAlpha(255);
+                    loginPaint.setTextSize(dpToPixels(16));
+                    signUpPaint.setAlpha(125);
+                    signUpPaint.setTextSize(dpToPixels(64));
+                }
+
+                currentSignUpTextX = startSignUpTextX;
+                currentSignUpTextY = startSignUpTextY;
+
+                // reset paths
+                signUpButtonPath.reset();
+                signUpButtonPath.moveTo(width, buttonBottom);
+                signUpButtonPath.lineTo(currentLeft, buttonBottom);
+                signUpButtonPath.lineTo(currentLeft, buttonTop);
+                signUpButtonPath.lineTo(width, buttonTop);
+                signUpButtonPath.close();
+
+
+                loginButtonPath.reset();
+                loginButtonPath.moveTo(0, buttonBottom);
+                loginButtonPath.lineTo(currentRight, buttonBottom);
+                loginButtonPath.lineTo(currentRight, buttonTop);
+                loginButtonPath.lineTo(0, buttonTop);
+                loginButtonPath.close();
+
+                callback.onButtonSwitched(isLogin);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
         });
 
         animator.start();
@@ -290,6 +412,10 @@ public class LoginButton extends View {
 
     private float dpToPixels(int dp) {
         return getResources().getDisplayMetrics().density * dp;
+    }
+
+    public void setOnButtonSwitched(OnButtonSwitchedListener callback) {
+        this.callback = callback;
     }
 
 }
