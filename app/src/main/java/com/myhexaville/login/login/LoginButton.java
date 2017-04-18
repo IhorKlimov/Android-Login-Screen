@@ -14,7 +14,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 
 import com.myhexaville.login.OnButtonSwitchedListener;
 import com.myhexaville.login.R;
@@ -25,6 +24,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.tan;
 
+// fix ugly buttons
 public class LoginButton extends View {
     public static final String LOG_TAG = "LoginButton";
     private int width, height;
@@ -39,7 +39,7 @@ public class LoginButton extends View {
 
     private Rect r = new Rect();
 
-    private int currentRectangleRight;
+    private int startRight;
     private float currentY;
     private int buttonCenter;
     private float currentX, currentRight;
@@ -72,6 +72,7 @@ public class LoginButton extends View {
     private float startSignUpTextY;
     private float startLoginX;
     private float startLoginY;
+    private float loginOrX;
 
 
     public LoginButton(Context context) {
@@ -131,19 +132,20 @@ public class LoginButton extends View {
         height = h;
         buttonTop = height - getBottomMargin() - getButtonHeight();
         buttonBottom = height - getBottomMargin();
-        currentRectangleRight = (int) getStartButtonRight();
+        startRight = (int) getStartButtonRight();
 
         buttonCenter = (buttonBottom - buttonTop) / 2 + buttonTop;
 
         currentSignUpX = width;
-        Log.d(LOG_TAG, "onSizeChanged: " + currentSignUpX);
         currentBottomSignUpX = width;
+
+        loginOrX = dpToPixels(32);
 
         currentY = buttonCenter;
         currentBottomY = buttonBottom;
-        currentRight = currentRectangleRight;
-        currentLeft = width - currentRectangleRight;
-        startLeft = width - currentRectangleRight;
+        currentRight = startRight;
+        currentLeft = width - startRight;
+        startLeft = width - startRight;
 
         loginPaint.getTextBounds("SIGN UP", 0, 7, r);
 
@@ -167,7 +169,6 @@ public class LoginButton extends View {
         startLoginY = currentLoginY;
         startSignUpTextX = currentSignUpTextX;
         startSignUpTextY = currentSignUpTextY;
-
 
         loginButtonPath.moveTo(0, buttonBottom);
         loginButtonPath.lineTo(currentRight, buttonBottom);
@@ -193,7 +194,6 @@ public class LoginButton extends View {
         }
 
         if (isLogin) {
-//            canvas.drawRect(0, 0, width, height, signUpButtonPaint);
             canvas.drawPath(loginButtonPath, loginButtonPaint);
             canvas.drawArc(
                     currentRight - getButtonHeight() / 2 + currentArcX,
@@ -204,15 +204,13 @@ public class LoginButton extends View {
                     360,
                     false,
                     loginButtonPaint);
+
+            canvas.drawText("OR", loginOrX, buttonCenter + dpToPixels(8), orPaint);
+            canvas.drawText("LOGIN", currentLoginX, currentLoginY, loginPaint);
         }
 
-        if (isLogin) {
-            canvas.drawText("OR", dpToPixels(32), buttonCenter + dpToPixels(8), orPaint);
-        }
-        canvas.drawText("LOGIN", currentLoginX, currentLoginY, loginPaint);
 
         if (!isLogin) {
-//            canvas.drawRect(0, 0, width, height, loginButtonPaint);
             canvas.drawPath(signUpButtonPath, signUpButtonPaint);
             canvas.drawArc(
                     currentLeft - getButtonHeight() / 2 + currentArcX,
@@ -330,10 +328,7 @@ public class LoginButton extends View {
                 signUpButtonPath.lineTo(width, currentBottomY);
                 signUpButtonPath.lineTo(currentBottomSignUpX, currentBottomY);
                 signUpButtonPath.lineTo(currentLeft, buttonBottom);
-
-                Log.d(LOG_TAG, "startAnimation: " + currentSignUpX);
             }
-
 
             currentX = 0;
             currentSignUpX = width;
@@ -349,7 +344,6 @@ public class LoginButton extends View {
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                Log.d(LOG_TAG, "onAnimationEnd: ");
                 orPaint.setAlpha(125);
                 signUpPaint.setAlpha(255);
                 signUpPaint.setTextSize(dpToPixels(16));
@@ -373,6 +367,30 @@ public class LoginButton extends View {
                 currentSignUpTextX = startSignUpTextX;
                 currentSignUpTextY = startSignUpTextY;
 
+                int hideButton = startRight + getButtonHeight() / 2;
+                if (!isLogin) {
+                    currentLeft += hideButton;
+                } else {
+                    currentRight -= hideButton;
+                }
+
+
+
+                //move texts
+                if (!isLogin) {
+                    signUpOrX += hideButton;
+                    currentSignUpTextX += hideButton;
+                } else {
+                    loginOrX -= hideButton;
+                    currentLoginX -= hideButton;
+                }
+                float hiddenButtonLeft = currentLeft;
+                float hiddenButtonRight = currentRight;
+                float endSignUpOrX = signUpOrX;
+                float endSignUpTextX = currentSignUpTextX;
+                float endLoginOrX = loginOrX;
+                float endLoginTextX = currentLoginX;
+
                 // reset paths
                 signUpButtonPath.reset();
                 signUpButtonPath.moveTo(width, buttonBottom);
@@ -380,7 +398,6 @@ public class LoginButton extends View {
                 signUpButtonPath.lineTo(currentLeft, buttonTop);
                 signUpButtonPath.lineTo(width, buttonTop);
                 signUpButtonPath.close();
-
 
                 loginButtonPath.reset();
                 loginButtonPath.moveTo(0, buttonBottom);
@@ -390,6 +407,43 @@ public class LoginButton extends View {
                 loginButtonPath.close();
 
                 callback.onButtonSwitched(isLogin);
+
+                ValueAnimator buttonJump = ObjectAnimator.ofInt(0, hideButton).setDuration(3000);
+                buttonJump.addUpdateListener(a -> {
+                    int v = (int) a.getAnimatedValue();
+                    Log.d(LOG_TAG, "onAnimationEnd: " + v);
+
+                    if (!isLogin) {
+                        currentLeft = hiddenButtonLeft - v;
+
+                        signUpOrX = endSignUpOrX - v;
+                        currentSignUpTextX = endSignUpTextX - v;
+
+
+
+                        signUpButtonPath.reset();
+                        signUpButtonPath.moveTo(width, buttonBottom);
+                        signUpButtonPath.lineTo(currentLeft, buttonBottom);
+                        signUpButtonPath.lineTo(currentLeft, buttonTop);
+                        signUpButtonPath.lineTo(width, buttonTop);
+                        signUpButtonPath.close();
+                    } else {
+                        currentRight = hiddenButtonRight + v;
+
+                        loginOrX = endLoginOrX + v;
+                        currentLoginX = endLoginTextX + v;
+
+                        loginButtonPath.reset();
+                        loginButtonPath.moveTo(0, buttonBottom);
+                        loginButtonPath.lineTo(currentRight, buttonBottom);
+                        loginButtonPath.lineTo(currentRight, buttonTop);
+                        loginButtonPath.lineTo(0, buttonTop);
+                        loginButtonPath.close();
+                    }
+                    invalidate();
+                });
+                buttonJump.start();
+
             }
 
             @Override
