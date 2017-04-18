@@ -52,12 +52,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void rotate(View view) {
         if (isLogin) {
+            binding.topLogin.setAlpha(1f);
             binding.topLogin.animate().rotation(0).setListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     binding.bottomLogin.setAlpha(1f);
                     binding.topLogin.setRotation(-90);
+                    binding.topLogin.setAlpha(0f);
                 }
             });
             binding.bottomSignUp.animate().alpha(0f);
