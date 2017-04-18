@@ -10,7 +10,13 @@
         tools:context="com.myhexaville.login.MainActivity">
 
         <FrameLayout
-            android:id="@+id/bottom"
+            android:id="@+id/bottom_login"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+        <FrameLayout
+            android:id="@+id/bottom_sign_up"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
@@ -23,7 +29,13 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <FrameLayout
-            android:id="@+id/top"
+            android:id="@+id/top_login"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+        <FrameLayout
+            android:id="@+id/top_sign_up"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
