@@ -32,11 +32,12 @@ public class MainActivity extends AppCompatActivity {
         binding.topLogin.setRotation(-90);
         binding.topSignUp.setRotation(90);
 
-        binding.button.setOnButtonSwitched(isLogin ->
-                binding.getRoot()
-                        .setBackgroundColor(ContextCompat.getColor(
-                                this,
-                                isLogin ? R.color.colorPrimary : R.color.colorAccent)));
+        binding.button.setOnButtonSwitched(isLogin -> {
+            binding.getRoot()
+                    .setBackgroundColor(ContextCompat.getColor(
+                            this,
+                            isLogin ? R.color.colorPrimary : R.color.colorAccent));
+        });
 
         binding.bottomLogin.setAlpha(0f);
     }
@@ -59,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
                     super.onAnimationEnd(animation);
                     binding.bottomLogin.setAlpha(1f);
                     binding.topLogin.setRotation(-90);
-                    binding.topLogin.setAlpha(0f);
                 }
             });
             binding.bottomSignUp.animate().alpha(0f);

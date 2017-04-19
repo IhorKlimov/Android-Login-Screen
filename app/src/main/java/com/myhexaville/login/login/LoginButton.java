@@ -18,6 +18,7 @@ import android.view.View;
 import com.myhexaville.login.OnButtonSwitchedListener;
 import com.myhexaville.login.R;
 
+import static android.graphics.Paint.Align.CENTER;
 import static android.graphics.Paint.Style.FILL;
 import static java.lang.Math.PI;
 import static java.lang.Math.max;
@@ -110,7 +111,7 @@ public class LoginButton extends View {
 
         loginPaint = new Paint();
         loginPaint.setColor(ContextCompat.getColor(getContext(), R.color.text));
-        loginPaint.setTextAlign(Paint.Align.CENTER);
+        loginPaint.setTextAlign(CENTER);
         loginPaint.setTextSize(dpToPixels(16));
 
         orPaint = new Paint();
@@ -121,7 +122,7 @@ public class LoginButton extends View {
         signUpPaint.setColor(ContextCompat.getColor(getContext(), R.color.text));
         signUpPaint.setTextSize(dpToPixels(64));
 //        signUpPaint.setTypeface(Typeface.create(DEFAULT, BOLD));
-        signUpPaint.setTextAlign(Paint.Align.CENTER);
+        signUpPaint.setTextAlign(CENTER);
         signUpPaint.setAlpha(125);
     }
 
@@ -188,9 +189,9 @@ public class LoginButton extends View {
         super.onDraw(canvas);
 
         if (isLogin) {
-            canvas.drawText("SIGN UP", width / 2, 1600, signUpPaint);
+            canvas.drawText("SIGN UP", width / 2, dpToPixels(457), signUpPaint);
         } else {
-            canvas.drawText("LOGIN", width / 2, 1600, loginPaint);
+            canvas.drawText("LOGIN", width / 2, dpToPixels(457), loginPaint);
         }
 
         if (isLogin) {
@@ -207,10 +208,7 @@ public class LoginButton extends View {
 
             canvas.drawText("OR", loginOrX, buttonCenter + dpToPixels(8), orPaint);
             canvas.drawText("LOGIN", currentLoginX, currentLoginY, loginPaint);
-        }
-
-
-        if (!isLogin) {
+        } else {
             canvas.drawPath(signUpButtonPath, signUpButtonPaint);
             canvas.drawArc(
                     currentLeft - getButtonHeight() / 2 + currentArcX,
@@ -263,11 +261,11 @@ public class LoginButton extends View {
             // move login text to center and scale
             if (isLogin) {
                 currentLoginX = startLoginX + ((width / 2 - startLoginX) * fraction);
-                currentLoginY = startLoginY - ((startLoginY - 1600) * fraction);
+                currentLoginY = startLoginY - ((startLoginY - dpToPixels(457)) * fraction);
                 loginPaint.setTextSize(smallTextSize + ((largeTextSize - smallTextSize) * (fraction)));
             } else {
                 currentSignUpTextX = startSignUpTextX - ((startSignUpTextX - width / 2) * fraction);
-                currentSignUpTextY = startSignUpTextY - ((startSignUpTextY - 1600) * fraction);
+                currentSignUpTextY = startSignUpTextY - ((startSignUpTextY - dpToPixels(457)) * fraction);
                 signUpPaint.setTextSize(smallTextSize + ((largeTextSize - smallTextSize) * (fraction)));
             }
 
@@ -375,7 +373,6 @@ public class LoginButton extends View {
                 }
 
 
-
                 //move texts
                 if (!isLogin) {
                     signUpOrX += hideButton;
@@ -408,8 +405,10 @@ public class LoginButton extends View {
 
                 callback.onButtonSwitched(isLogin);
 
-                ValueAnimator buttonJump = ObjectAnimator.ofInt(0, hideButton).setDuration(3000);
-                buttonJump.addUpdateListener(a -> {
+                ValueAnimator buttonBounce = ObjectAnimator.ofInt(0, hideButton).setDuration(500);
+                buttonBounce.setStartDelay(300);
+                buttonBounce.setInterpolator(new MyBounceInterpolator(.2, 7));
+                buttonBounce.addUpdateListener(a -> {
                     int v = (int) a.getAnimatedValue();
                     Log.d(LOG_TAG, "onAnimationEnd: " + v);
 
@@ -418,7 +417,6 @@ public class LoginButton extends View {
 
                         signUpOrX = endSignUpOrX - v;
                         currentSignUpTextX = endSignUpTextX - v;
-
 
 
                         signUpButtonPath.reset();
@@ -442,7 +440,7 @@ public class LoginButton extends View {
                     }
                     invalidate();
                 });
-                buttonJump.start();
+                buttonBounce.start();
 
             }
 
