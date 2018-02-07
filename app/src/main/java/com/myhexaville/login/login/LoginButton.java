@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.myhexaville.login.OnButtonSwitchedListener;
@@ -20,6 +21,7 @@ import com.myhexaville.login.R;
 
 import static android.graphics.Paint.Align.CENTER;
 import static android.graphics.Paint.Style.FILL;
+import static android.view.MotionEvent.ACTION_UP;
 import static java.lang.Math.PI;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -27,7 +29,7 @@ import static java.lang.Math.tan;
 
 // fix ugly buttons
 public class LoginButton extends View {
-    public static final String LOG_TAG = "LoginButton";
+    public static final String TAG = "LoginButton";
     private int width, height;
 
     private int buttonTop, buttonBottom;
@@ -74,6 +76,9 @@ public class LoginButton extends View {
     private float startLoginX;
     private float startLoginY;
     private float loginOrX;
+    private OnClickListener onClickListener;
+    private Rect loginButtonOutline;
+    private Rect signUpButtonOutline;
 
 
     public LoginButton(Context context) {
@@ -182,6 +187,18 @@ public class LoginButton extends View {
         signUpButtonPath.lineTo(currentLeft, buttonTop);
         signUpButtonPath.lineTo(width, buttonTop);
         signUpButtonPath.close();
+
+        loginButtonOutline = new Rect(
+                0,
+                buttonTop,
+                (int) currentRight + getButtonHeight() / 2,
+                buttonBottom);
+
+        signUpButtonOutline = new Rect(
+                (int) (width - currentRight - getButtonHeight() / 2),
+                buttonTop,
+                width,
+                buttonBottom);
     }
 
     @Override
@@ -410,7 +427,7 @@ public class LoginButton extends View {
                 buttonBounce.setInterpolator(new MyBounceInterpolator(.2, 7));
                 buttonBounce.addUpdateListener(a -> {
                     int v = (int) a.getAnimatedValue();
-                    Log.d(LOG_TAG, "onAnimationEnd: " + v);
+                    Log.d(TAG, "onAnimationEnd: " + v);
 
                     if (!isLogin) {
                         currentLeft = hiddenButtonLeft - v;
@@ -468,6 +485,27 @@ public class LoginButton extends View {
 
     public void setOnButtonSwitched(OnButtonSwitchedListener callback) {
         this.callback = callback;
+    }
+
+    @Override
+    public void setOnClickListener(@Nullable OnClickListener l) {
+        setOnTouchListener((v, event) -> {
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+            if (isLogin && loginButtonOutline.contains(x, y)) {
+                if (event.getAction() == ACTION_UP) {
+                    l.onClick(v);
+                }
+                return true;
+            } else if (!isLogin && signUpButtonOutline.contains(x, y)) {
+                if (event.getAction() == ACTION_UP) {
+                    l.onClick(v);
+                }
+                return true;
+            } else {
+                return false;
+            }
+        });
     }
 
 }

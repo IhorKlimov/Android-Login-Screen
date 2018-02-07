@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         binding.topSignUp.setPivotY(binding.topLogin.getHeight());
     }
 
-    public void rotate(View view) {
+    public void switchFragment(View v) {
         if (isLogin) {
             binding.topLogin.setAlpha(1f);
             binding.topLogin.animate().rotation(0).setListener(new AnimatorListenerAdapter() {
