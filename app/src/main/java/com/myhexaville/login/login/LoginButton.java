@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 
 import com.myhexaville.login.OnButtonSwitchedListener;
@@ -76,9 +75,13 @@ public class LoginButton extends View {
     private float startLoginX;
     private float startLoginY;
     private float loginOrX;
-    private OnClickListener onClickListener;
     private Rect loginButtonOutline;
     private Rect signUpButtonOutline;
+
+    private OnSignUpListener onSignUpListener;
+    private OnLoginListener onLoginListener;
+    private Rect loginTextOutline;
+    private Rect signUpTextOutline;
 
 
     public LoginButton(Context context) {
@@ -103,7 +106,7 @@ public class LoginButton extends View {
 
     private void init() {
         loginButtonPaint = new Paint();
-        loginButtonPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+        loginButtonPaint.setColor(ContextCompat.getColor(getContext(), R.color.secondPage));
         loginButtonPaint.setStyle(FILL);
 
         signUpButtonPaint = new Paint();
@@ -126,7 +129,6 @@ public class LoginButton extends View {
         signUpPaint = new Paint();
         signUpPaint.setColor(ContextCompat.getColor(getContext(), R.color.text));
         signUpPaint.setTextSize(dpToPixels(64));
-//        signUpPaint.setTypeface(Typeface.create(DEFAULT, BOLD));
         signUpPaint.setTextAlign(CENTER);
         signUpPaint.setAlpha(125);
     }
@@ -159,8 +161,16 @@ public class LoginButton extends View {
         int signUpWidth = r.right;
         currentSignUpTextX = width - signUpWidth / 2 - dpToPixels(32);
 
-
         loginPaint.getTextBounds("LOGIN", 0, 5, r);
+
+        loginTextOutline = new Rect();
+        signUpTextOutline = new Rect();
+        signUpPaint.getTextBounds("LOGIN", 0, 5, loginTextOutline);
+        signUpPaint.getTextBounds("SIGN UP", 0, 7, signUpTextOutline);
+
+        loginTextOutline.offset(width / 2 - (loginTextOutline.right + loginTextOutline.left) / 2, (int) dpToPixels(457));
+        signUpTextOutline.offset(width / 2 - (signUpTextOutline.right + signUpTextOutline.left) / 2, (int) dpToPixels(457));
+
         int loginWidth = r.right;
         orPaint.getTextBounds("OR", 0, 2, r);
         float margin = (currentLoginX - loginWidth / 2) - dpToPixels(32) - r.right;
@@ -427,7 +437,6 @@ public class LoginButton extends View {
                 buttonBounce.setInterpolator(new MyBounceInterpolator(.2, 7));
                 buttonBounce.addUpdateListener(a -> {
                     int v = (int) a.getAnimatedValue();
-                    Log.d(TAG, "onAnimationEnd: " + v);
 
                     if (!isLogin) {
                         currentLeft = hiddenButtonLeft - v;
@@ -497,15 +506,35 @@ public class LoginButton extends View {
                     l.onClick(v);
                 }
                 return true;
-            } else if (!isLogin && signUpButtonOutline.contains(x, y)) {
+            } else if (!isLogin && loginTextOutline.contains(x, y)) {
                 if (event.getAction() == ACTION_UP) {
-                    l.onClick(v);
+                    onLoginListener.login();
+                }
+                return true;
+            } else if (isLogin && signUpTextOutline.contains(x, y)) {
+                if (event.getAction() == ACTION_UP) {
+                    onSignUpListener.signUp();
                 }
                 return true;
             } else {
-                return false;
+                if (!isLogin && signUpButtonOutline.contains(x, y)) {
+                    if (event.getAction() == ACTION_UP) {
+                        l.onClick(v);
+                    }
+                    return true;
+                } else {
+                    return false;
+                }
             }
         });
+    }
+
+    public void setOnSignUpListener(OnSignUpListener listener) {
+        onSignUpListener = listener;
+    }
+
+    public void setOnLoginListener(OnLoginListener listener) {
+        onLoginListener = listener;
     }
 
 }
