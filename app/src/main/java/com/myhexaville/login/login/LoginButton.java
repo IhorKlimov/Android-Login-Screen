@@ -130,7 +130,7 @@ public class LoginButton extends View {
         signUpPaint.setColor(ContextCompat.getColor(getContext(), R.color.text));
         signUpPaint.setTextSize(dpToPixels(64));
         signUpPaint.setTextAlign(CENTER);
-        signUpPaint.setAlpha(125);
+//        signUpPaint.setAlpha(255);
     }
 
     @Override
@@ -275,10 +275,9 @@ public class LoginButton extends View {
 
             // fade out sign up text to 0
             if (isLogin) {
-                signUpPaint.setAlpha((int) (125 - 125 * fraction));
+                signUpPaint.setAlpha((int) (255 - 255 * fraction)); // fade out sign up large text
             } else {
-                loginPaint.setAlpha((int) (255 - 255 * fraction));
-                signUpPaint.setAlpha((int) (255 - 130 * fraction));
+                loginPaint.setAlpha((int) (255 - 255 * fraction)); // fade out login large text
             }
 
             if (orPaint.getAlpha() != 0) {
@@ -385,7 +384,7 @@ public class LoginButton extends View {
                     currentLoginY = startLoginY;
                     loginPaint.setAlpha(255);
                     loginPaint.setTextSize(dpToPixels(16));
-                    signUpPaint.setAlpha(125);
+                    signUpPaint.setAlpha(255);
                     signUpPaint.setTextSize(dpToPixels(64));
                 }
 
