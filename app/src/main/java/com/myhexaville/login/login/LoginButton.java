@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -26,7 +27,6 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.Math.tan;
 
-// fix ugly buttons
 public class LoginButton extends View {
     public static final String TAG = "LoginButton";
     private int width, height;
@@ -155,24 +155,24 @@ public class LoginButton extends View {
         currentLeft = width - startRight;
         startLeft = width - startRight;
 
-        loginPaint.getTextBounds("SIGN UP", 0, 7, r);
+        loginPaint.getTextBounds(getString(R.string.sign_up), 0, 7, r);
 
         currentLoginX = dpToPixels(92);
         int signUpWidth = r.right;
         currentSignUpTextX = width - signUpWidth / 2 - dpToPixels(32);
 
-        loginPaint.getTextBounds("LOGIN", 0, 5, r);
+        loginPaint.getTextBounds(getString(R.string.login), 0, 5, r);
 
         loginTextOutline = new Rect();
         signUpTextOutline = new Rect();
-        signUpPaint.getTextBounds("LOGIN", 0, 5, loginTextOutline);
-        signUpPaint.getTextBounds("SIGN UP", 0, 7, signUpTextOutline);
+        signUpPaint.getTextBounds(getString(R.string.login), 0, 5, loginTextOutline);
+        signUpPaint.getTextBounds(getString(R.string.sign_up), 0, 7, signUpTextOutline);
 
         loginTextOutline.offset(width / 2 - (loginTextOutline.right + loginTextOutline.left) / 2, (int) dpToPixels(457));
         signUpTextOutline.offset(width / 2 - (signUpTextOutline.right + signUpTextOutline.left) / 2, (int) dpToPixels(457));
 
         int loginWidth = r.right;
-        orPaint.getTextBounds("OR", 0, 2, r);
+        orPaint.getTextBounds(getContext().getString(R.string.or).toUpperCase(), 0, 2, r);
         float margin = (currentLoginX - loginWidth / 2) - dpToPixels(32) - r.right;
         signUpOrX = width - signUpWidth - dpToPixels(32) - r.right - margin;
 
@@ -216,9 +216,9 @@ public class LoginButton extends View {
         super.onDraw(canvas);
 
         if (isLogin) {
-            canvas.drawText("SIGN UP", width / 2, dpToPixels(457), signUpPaint);
+            canvas.drawText(getString(R.string.sign_up), width / 2, dpToPixels(457), signUpPaint);
         } else {
-            canvas.drawText("LOGIN", width / 2, dpToPixels(457), loginPaint);
+            canvas.drawText(getString(R.string.login), width / 2, dpToPixels(457), loginPaint);
         }
 
         if (isLogin) {
@@ -233,8 +233,8 @@ public class LoginButton extends View {
                     false,
                     loginButtonPaint);
 
-            canvas.drawText("OR", loginOrX, buttonCenter + dpToPixels(8), orPaint);
-            canvas.drawText("LOGIN", currentLoginX, currentLoginY, loginPaint);
+            canvas.drawText(getString(R.string.or), loginOrX, buttonCenter + dpToPixels(8), orPaint);
+            canvas.drawText(getString(R.string.login), currentLoginX, currentLoginY, loginPaint);
         } else {
             canvas.drawPath(signUpButtonPath, signUpButtonPaint);
             canvas.drawArc(
@@ -247,9 +247,9 @@ public class LoginButton extends View {
                     false,
                     signUpButtonPaint);
 
-            canvas.drawText("OR", signUpOrX, buttonCenter + dpToPixels(8), orPaint);
+            canvas.drawText(getString(R.string.or), signUpOrX, buttonCenter + dpToPixels(8), orPaint);
 
-            canvas.drawText("SIGN UP", currentSignUpTextX, currentSignUpTextY, signUpPaint);
+            canvas.drawText(getString(R.string.sign_up), currentSignUpTextX, currentSignUpTextY, signUpPaint);
         }
     }
 
@@ -444,7 +444,6 @@ public class LoginButton extends View {
                         signUpOrX = endSignUpOrX - v;
                         currentSignUpTextX = endSignUpTextX - v;
 
-
                         signUpButtonPath.reset();
                         signUpButtonPath.moveTo(width, buttonBottom);
                         signUpButtonPath.lineTo(currentLeft, buttonBottom);
@@ -535,6 +534,10 @@ public class LoginButton extends View {
 
     public void setOnLoginListener(OnLoginListener listener) {
         onLoginListener = listener;
+    }
+
+    private String getString(@StringRes int stringId) {
+        return getContext().getString(stringId).toUpperCase();
     }
 
 }
