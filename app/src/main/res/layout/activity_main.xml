@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+
     <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -9,35 +10,28 @@
         android:fitsSystemWindows="true"
         tools:context="com.myhexaville.login.MainActivity">
 
-        <FrameLayout
-            android:id="@+id/bottom_login"
+        <com.myhexaville.login.FlexibleFrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            android:id="@+id/wrapper"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <FrameLayout
-            android:id="@+id/bottom_sign_up"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            <FrameLayout
+                android:id="@+id/sign_up_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-        <com.myhexaville.login.login.LoginButton
-            android:id="@+id/button"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:onClick="switchFragment"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            <com.myhexaville.login.login.LoginButton
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:onClick="switchFragment" />
 
-        <FrameLayout
-            android:id="@+id/top_login"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            <FrameLayout
+                android:id="@+id/login_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </com.myhexaville.login.FlexibleFrameLayout>
 
-        <FrameLayout
-            android:id="@+id/top_sign_up"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     </android.support.design.widget.CoordinatorLayout>
 </layout>
