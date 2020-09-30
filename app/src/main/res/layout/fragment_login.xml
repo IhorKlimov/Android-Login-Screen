@@ -28,6 +28,7 @@
         android:textColorHint="#8effffff"
         android:gravity="center_vertical"
         android:paddingStart="32dp"
+        android:password="true"
         android:hint="@string/password"
         android:textColor="#ffffff" />
 

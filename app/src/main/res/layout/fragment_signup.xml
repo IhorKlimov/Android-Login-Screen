@@ -35,6 +35,7 @@
             android:inputType="textPassword"
             android:paddingStart="32dp"
             android:textColor="#ffffff"
+            android:password="true"
             android:paddingEnd="32dp"
             android:textColorHint="#8effffff" />
 
@@ -49,6 +50,7 @@
             android:inputType="textPassword"
             android:paddingEnd="32dp"
             android:paddingStart="32dp"
+             android:password="true"
             android:textColor="#ffffff"
             android:textColorHint="#8effffff" />
     </LinearLayout>
